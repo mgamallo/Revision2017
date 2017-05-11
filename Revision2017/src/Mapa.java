@@ -17,7 +17,8 @@ import com.itextpdf.text.pdf.parser.PdfTextExtractor;
 
 public class Mapa {
 
-	static String separadorApartir = "HFTRNT";
+	static final String separadorApartir = "HFTRNT";
+	static final String separadorFusionar = "VESASEV";
 	
 	String rutaArchivo = "";
 	String textoPag1 = "";
@@ -70,6 +71,8 @@ public class Mapa {
 			//	Obtenemos el nhc y renombramos el fichero
 			nhc = getNHC();
 			// renombraFichero(pdf);
+			
+			// JOptionPane.showMessageDialog(null, "NHC ... " + nhc);
 		
 			pdf.close();    // Ojjjjjjjjjjjjjjjjjjjjooooooooooooooooooooooooo, me había olvidado
 			
@@ -110,21 +113,28 @@ public class Mapa {
 	
 	String getNHC(){
 
-			String apartir = getApartir(textoPag1);
-			if(apartir.equals("NO")){
-				Etiqueta etiqueta = new Etiqueta(textoPag1);
-				
-				System.out.println("El tipo de etiqueta es... " + etiqueta.tipo);
-				if(etiqueta.tipo == 0){
-					return etiqueta.nhc;  // "NO encontró el tipo de etiqueta"
+			boolean fusionar = getFusionar(textoPag1);
+			if(!fusionar){
+				String apartir = getApartir(textoPag1);
+				if(apartir.equals("NO")){
+					Etiqueta etiqueta = new Etiqueta(textoPag1);
+					
+					System.out.println("El tipo de etiqueta es... " + etiqueta.tipo);
+					if(etiqueta.tipo == 0){
+						return etiqueta.nhc;  // "NO encontró el tipo de etiqueta"
+					}
+					else{
+						return etiqueta.nhc;
+					}
 				}
-				else{
-					return etiqueta.nhc;
+				else if(apartir.equals("SI")){
+					return Inicio.SEPARADOR;
 				}
 			}
-			else if(apartir.equals("SI")){
-				return "Separador";
+			else{
+				return Inicio.SEPARADOR_FUSIONAR;
 			}
+
 	
 		return "";
 	}
@@ -152,6 +162,23 @@ public class Mapa {
 		return "NO";
 	}
 	
+	
+	boolean getFusionar(String cadenaBruta){
+			
+		String sub = "";
+		if(cadenaBruta.length() > 22){
+			sub = cadenaBruta.substring(0, 22);
+		}
+		else{
+			return false;
+		}
+		
+		if(sub.contains( /* separadorFusionar */ "Fusionar")){
+			return true;
+		}
+		
+		return false;
+	}
 	
 	boolean renombraFichero(PdfReader pdf){
 				

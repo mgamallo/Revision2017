@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
 
 import jxl.Sheet;
 import jxl.Workbook;
@@ -281,12 +282,16 @@ public class LeerExcel {
 	        }
 	        
 	        /*
+	        JOptionPane.showMessageDialog(null, "Ver lista documentos Xedoc");
+	        
 	        System.out.println("Documentos Xedoc");
 	        for( Iterator it = documentosXedoc.keySet().iterator(); it.hasNext();) {
 	        	String clave = (String)it.next();
 	        	String valor = (String)documentosXedoc.get(clave);
 	        	System.out.println(clave + " : " + valor);
 	        }
+	        
+	        JOptionPane.showMessageDialog(null, "Vista lista documentos Xedoc");
 	        */
 	        
 	        /*
@@ -497,6 +502,14 @@ public class LeerExcel {
 		        	}
 		        	*/
 		        	
+		        	String modeloBisEspecial = hoja.getCell(13,fila).getContents();
+		        	if(modeloBisEspecial.equals("Especial")){
+		        		modelo.modeloEspecial = true;
+		        	}
+		        	else{
+		        		modelo.modeloEspecial = false;
+		        	}
+		        	
 		        //	modelo.nombreAlternativo = hoja.getCell(21, fila).getContents();
 		        	modelo.instruccionesNHC = hoja.getCell(10,fila).getContents();
 		        	modelo.instruccionesCIP = hoja.getCell(11,fila).getContents();
@@ -665,7 +678,15 @@ public class LeerExcel {
 		        	modelo.instruccionesNHC = hoja.getCell(10,fila).getContents();
 		        	modelo.instruccionesCIP = hoja.getCell(11,fila).getContents();
 		        	modelo.instruccionesNSS = hoja.getCell(12,fila).getContents();
-		        	
+		        			        	
+		        	String modeloBisEspecial = hoja.getCell(13,fila).getContents();
+		        	if(modeloBisEspecial.equals("Especial")){
+		        		modelo.modeloEspecial = true;
+		        	}
+		        	else{
+		        		modelo.modeloEspecial = false;
+		        	}
+		        	        	
 		        	modelo.centroExterno = hoja.getCell(14,fila).getContents();
 		        	modelo.claveCentroExterno1 = hoja.getCell(15,fila).getContents();
 		        	modelo.claveCentroExterno2 = hoja.getCell(16,fila).getContents();

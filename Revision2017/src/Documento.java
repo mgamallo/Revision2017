@@ -1,3 +1,4 @@
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,21 +10,28 @@ import java.util.Iterator;
 
 import javax.swing.JOptionPane;
 
+import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfAction;
+import com.itextpdf.text.pdf.PdfCopy;
 import com.itextpdf.text.pdf.PdfDestination;
 import com.itextpdf.text.pdf.PdfDictionary;
+import com.itextpdf.text.pdf.PdfImportedPage;
 import com.itextpdf.text.pdf.PdfName;
 import com.itextpdf.text.pdf.PdfNumber;
 import com.itextpdf.text.pdf.PdfPage;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.RandomAccessFileOrArray;
 import com.itextpdf.text.pdf.codec.Base64.InputStream;
 
 
+
 public class Documento {
+	
+	public static final int TAMAÑO_PAG_BLANCO = 20;
 
 	String rutaArchivo ="";					//	Ruta absoluta
 	String nhc ="X";												// ok
@@ -56,6 +64,8 @@ public class Documento {
 		/* Si no localizamos el nhc, luego lo mapeamos, primero con la ayuda de saber
 		   que documento es, luego, fuerza bruta.
 		 */
+		
+		// detectaPaginasBlanco();
 	}
 
 	public void getNhc(){
@@ -65,6 +75,9 @@ public class Documento {
 	
 	void setNumeroModelo(int imagen, String columna){
 		numeroModelo = (imagen) + columna;
+		
+		// System.out.println(numeroModelo);
+		
 	}
 	
 	boolean reDetectorNHCUrgencias(){
@@ -532,8 +545,10 @@ public class Documento {
 		System.out.println(modelo.numImagen + "  " + modelo.nombreNormalizado
 				+ "  " + modelo.servicioFijo + " "
 				+ modelo.metadatos.metaServicioNombre);
+				
 */	
-		if (!nhc.equals("Separador")) {
+		
+		if (!nhc.equals(Inicio.SEPARADOR) && !nhc.equals(Inicio.SEPARADOR_FUSIONAR)) {
 
 			if (colum == 1 && !modelo.metadatos.metaServicioNombre.equals("@")) {
 
@@ -548,7 +563,19 @@ public class Documento {
 								+ modelo.metadatos.metaServicioNombre);
 						System.out.println("El número de imagen es... "
 								+ modelo.numImagen);
-						setNumeroModelo(modelo.numImagen, "A");
+						
+						String letra = "A";
+						
+						
+						System.out.println(modelo.numImagen);
+						System.out.println(modelo.modeloEspecial);
+						
+						
+						if(modelo.modeloEspecial){
+							letra = letra.toLowerCase();
+						}
+						
+						setNumeroModelo(modelo.numImagen, letra);
 
 						return true;
 					}
@@ -564,7 +591,13 @@ public class Documento {
 						// + " = " + fisica.tamañoPagina);
 						System.out.println("Se encontró por esta palabra: "
 								+ modelo.metadatos.metaNombre);
-						setNumeroModelo(modelo.numImagen, "B");
+						
+						String letra = "B";
+						if(modelo.modeloEspecial){
+							letra = letra.toLowerCase();
+						}
+						
+						setNumeroModelo(modelo.numImagen, letra);
 
 						return true;
 					}
@@ -582,6 +615,13 @@ public class Documento {
 						System.out.println("Se encontró por esta palabra: "
 								+ modelo.metadatos.metaModelo);
 
+						String letra = "C";
+						if(modelo.modeloEspecial){
+							letra = letra.toLowerCase();
+						}
+						
+						setNumeroModelo(modelo.numImagen, letra);
+						
 						return true;
 					}
 				}
@@ -1048,7 +1088,8 @@ public class Documento {
 	}
 	
 	void detectaEKGs(){
-		if(this.nombreNormalizado.equals("X") && !this.nhc.equals("Separador")){
+		if(this.nombreNormalizado.equals("X") && !this.nhc.equals(Inicio.SEPARADOR)
+				&& !this.nhc.equals(Inicio.SEPARADOR_FUSIONAR)){
 			if(this.fisica.tamañoPagina == 0 && this.fisica.vertical == 2){
 				this.nombreNormalizado = Inicio.EKG;
 				}
@@ -1070,7 +1111,8 @@ public class Documento {
 
 	void detectaEcos(){
 		
-		if(this.nombreNormalizado.equals("X") && !this.nhc.equals("Separador")){
+		if(this.nombreNormalizado.equals("X") && !this.nhc.equals(Inicio.SEPARADOR)
+				&& !this.nhc.equals(Inicio.SEPARADOR_FUSIONAR)){
 			if((this.fisica.dimensiones.alto <= 330 && this.fisica.dimensiones.alto >= 290) || 
 					this.fisica.dimensiones.ancho <= 330 && this.fisica.dimensiones.ancho >= 290){
 				if( this.servicio.equals(Inicio.CARC) || this.servicio.equals(Inicio.PEDC)){
@@ -1086,7 +1128,8 @@ public class Documento {
 	
 	void detectaMonitor(){
 		
-		if(this.nombreNormalizado.equals("X") && !this.nhc.equals("Separador")){
+		if(this.nombreNormalizado.equals("X") && !this.nhc.equals(Inicio.SEPARADOR)
+				&& !this.nhc.equals(Inicio.SEPARADOR_FUSIONAR)){
 			if((this.fisica.dimensiones.alto <= 426 && this.fisica.dimensiones.alto >= 420) || 
 					this.fisica.dimensiones.ancho <= 426 && this.fisica.dimensiones.ancho >= 420){
 				this.nombreNormalizado = Inicio.MONITORIZACION;
@@ -1095,7 +1138,8 @@ public class Documento {
 	}
 	
 	void detectaDocRosa(){
-		if(this.nombreNormalizado.equals("X") && !this.nhc.equals("Separador")){
+		if(this.nombreNormalizado.equals("X") && !this.nhc.equals(Inicio.SEPARADOR)
+				&& !this.nhc.equals(Inicio.SEPARADOR_FUSIONAR)){
 			if((this.fisica.dimensiones.alto <= 455  && this.fisica.dimensiones.alto >= 451) || 
 					this.fisica.dimensiones.ancho <= 455 && this.fisica.dimensiones.ancho >= 451){
 				if(this.cadenaOCR.contains("Tratamiento") || this.cadenaOCR.contains("Diagnóstico")){
@@ -1105,6 +1149,67 @@ public class Documento {
 			}
 		}
 	}
+	
+	
+	public void detectaPaginasBlanco()     /*(String pdfSourceFile, String pdfDestinationFile)  */
+    {
+		
+		String pdfDestinationFile = "hola.pdf";
+		
+        try
+        {
+            // step 1: create new reader
+            PdfReader r = new PdfReader(rutaArchivo);
+            RandomAccessFileOrArray raf = new RandomAccessFileOrArray(rutaArchivo);
+            Document document = new Document(r.getPageSizeWithRotation(1));
+            // step 2: create a writer that listens to the document
+            PdfCopy writer = new PdfCopy(document, new FileOutputStream(pdfDestinationFile));
+            // step 3: we open the document
+            document.open();
+            // step 4: we add content
+            PdfImportedPage page = null;
+
+
+            //loop through each page and if the bs is larger than 20 than we know it is not blank.
+            //if it is less than 20 than we don't include that blank page.
+            for (int i=1;i<=r.getNumberOfPages();i++)
+            {
+                //get the page content
+                byte bContent [] = r.getPageContent(i,raf);
+                ByteArrayOutputStream bs = new ByteArrayOutputStream();
+                //write the content to an output stream
+                bs.write(bContent);
+                int tam = bs.size();
+                System.out.println("Tamaño de la página "+i+" = "+bs.size());
+                //add the page to the new pdf
+                
+                if(tam <= TAMAÑO_PAG_BLANCO)
+                			System.out.println("**************  Posible página en blanco ************");
+                
+                /*
+                if (bs.size() > TAMAÑO_PAG_BLANCO)
+                {
+                    page = writer.getImportedPage(r, i);
+                    writer.addPage(page);
+                }
+				*/
+                bs.close();
+            }
+            
+            JOptionPane.showMessageDialog(null, "Fin paciente");
+            
+            //close everything
+            document.close();
+            writer.close();
+            raf.close();
+            r.close();
+        }
+        catch(Exception e)
+        {
+        //do what you need here
+        }
+    }
+	
 	
 }
 

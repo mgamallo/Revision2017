@@ -20,6 +20,7 @@ public class Modelo {
 	String instruccionesNSS = "";
 	
 	boolean servicioFijo = false;
+	boolean modeloEspecial = false;
 	
 	String centroExterno = "";
 	

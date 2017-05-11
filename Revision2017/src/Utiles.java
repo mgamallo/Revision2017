@@ -4,11 +4,23 @@ import java.awt.Desktop;
 import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
+
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.PdfCopy;
+import com.itextpdf.text.pdf.PdfImportedPage;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
+import com.itextpdf.text.pdf.codec.Base64.OutputStream;
 
 
 public class Utiles {
@@ -160,7 +172,7 @@ public class Utiles {
 		Inicio.jCheckBox1.setSelected(false);
 		
 				
-		if(Inicio.jBNHC.getText().equals("Separador")){
+		if(Inicio.jBNHC.getText().equals(Inicio.SEPARADOR)){
 			Inicio.jBNHC.setBackground(new java.awt.Color(153, 255, 153));
 			Inicio.jBNHCp.setBackground(new java.awt.Color(153, 255, 153));
 			/*
@@ -190,6 +202,9 @@ public class Utiles {
 	public void registraCambiosFinales() {
 		// TODO Auto-generated method stub
 		
+		boolean ajustarCIdeRADM = false;
+		
+		
 		if(Inicio.ventanaComprobacion != null){
 			Inicio.ventanaComprobacion.dispose();
 		}
@@ -214,9 +229,8 @@ public class Utiles {
     	if(!Inicio.erroresAntesRegistrar){
 	    	new CerrarTodo().closePdf();
 	    	System.out.println("Cerrados los pdfs");
-	    	
-	    	
-	    	
+ 
+	    	ajustarCIdeRADM = esCIdeRx();
 	    	
 	    	for(int i=0;i<Inicio.listaDocumentos.length;i++){
 	    		
@@ -283,7 +297,35 @@ public class Utiles {
 
 	    				}
 	    				
-	    				
+	    				if(ajustarCIdeRADM){
+	    					
+	    					if(Inicio.listaDocumentos[i].servicio.equals("RADM") 
+	    							&& Inicio.listaDocumentos[i].nombreNormalizado.equals(Inicio.CONSENTIMIENTO)){
+	    						
+	    						boolean ajustar = false;
+	    						
+	    						String numeroModelo =  Inicio.listaDocumentos[i].numeroModelo;
+	    						
+	    						if(numeroModelo != null && numeroModelo.length() > 0){
+		    						
+	    							char caracter = numeroModelo.charAt(numeroModelo.length()-1);
+		    						
+		    						System.out.println(caracter);
+		    						
+		    						switch (caracter) {
+									case 'a':
+									case 'b':
+									case 'c':	ajustar = true;	break;
+									}
+		    						
+		    						if(ajustar){
+		    							borrarPaginaInicial(Inicio.listaDocumentos[i].rutaArchivo, Inicio.listaDocumentos[i].rutaArchivo + "f");
+		    						}
+	    						}
+
+	    							
+	    					}
+	    				}
 	    				
 	    				
 	    				String rutaNueva = Inicio.listaDocumentos[i].registraFichero();
@@ -422,6 +464,92 @@ public class Utiles {
 
 	    }
 
+	
+	public boolean esCIdeRx(){
+		
+		HashSet<String> servicios = new HashSet<String>();
+		
+		for(Documento documento : Inicio.listaDocumentos){
+			servicios.add(documento.servicio);
+		}
+		
+		System.out.println("Tamaño del conjunto: " + servicios.size());
+		for(String servicio : servicios){
+			System.out.println(servicio);
+		}
+		
+		// if(servicios.size() == 1){
+			if(servicios.contains("RADM")){
+				return true;
+			}
+		// }
+		
+		return false;
+	}
+	
+	
+	/**
+	 * Borra la página inical de un pdf. Ideado para los CI de Rx
+	 * 
+	 * @param rutaOrigen
+	 * @param rutaDestino
+	 */
+	public static void borrarPaginaInicial(String rutaOrigen, String rutaDestino){
+		
+		PdfReader reader = null;
+		Document documento = null;
+		
+		PdfCopy writer = null;
+		PdfImportedPage pagina = null;
+		
+		boolean hecho = false;
+		
+		try {
+			
+			reader = new PdfReader(rutaOrigen);
+			
+			documento = new Document(reader.getPageSizeWithRotation(1));
+			
+			writer = new PdfCopy(documento, new FileOutputStream(rutaDestino));
+			
+			documento.open();
+			
+			for(int i=2;i<=reader.getNumberOfPages();i++){
+				pagina = writer.getImportedPage(reader, i);
+				writer.addPage(pagina);
+			}
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DocumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally{
+			if(documento != null) documento.close();
+			if(writer != null) writer.close();
+			if(reader != null) reader.close();
+			hecho = true;
+		}
+		
+
+		if(hecho){
+			File viejo = new File(rutaOrigen);
+			
+			if(viejo.delete()){
+				System.out.println("Borrado original");
+				
+				File nuevo = new File(rutaDestino);
+				nuevo.renameTo(viejo);
+				System.out.println("Renombrado el nuevo");
+			}
+
+		}
+
+	}
+	
 	public void jBApartarActionPerformed(ActionEvent evt) {
 		// TODO Auto-generated method stub
 		
@@ -571,7 +699,7 @@ public class Utiles {
 						Inicio.listaDocumentos[proximoNHC+1].nhc.contains("NO")){
 							proximoNHC++;
 					}
-					else if(Inicio.listaDocumentos[proximoNHC].nhc.contains("Separador")){
+					else if(Inicio.listaDocumentos[proximoNHC].nhc.contains(Inicio.SEPARADOR)){
 						break;
 					}
 					else{
@@ -686,7 +814,7 @@ public class Utiles {
 				Inicio.jBNHC
 						.setText(Inicio.listaDocumentos[Inicio.numeroPdf].nhc);
 				if (Inicio.listaDocumentos[Inicio.numeroPdf].nhc
-						.equals("Separador")
+						.equals(Inicio.SEPARADOR)
 						|| Inicio.listaDocumentos[Inicio.numeroPdf].nhc
 								.contains("ERROR")
 						|| Inicio.listaDocumentos[Inicio.numeroPdf].nhc
@@ -724,7 +852,7 @@ public class Utiles {
 				}
 
 				if (Inicio.listaDocumentos[Inicio.numeroPdf].nhc
-						.equals("Separador")
+						.equals(Inicio.SEPARADOR)
 						&& !Inicio.listaDocumentos[Inicio.numeroPdf].servicio
 								.equals("X")) {
 					Inicio.jBNHC.setBackground(Color.green);

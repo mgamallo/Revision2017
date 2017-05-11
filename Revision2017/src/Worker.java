@@ -19,6 +19,7 @@ import javax.swing.SwingWorker;
 import com.itextpdf.awt.geom.Rectangle;
 
 
+
 class Worker extends SwingWorker<Double, Integer>{
 
 	JProgressBar progresoNHCs;
@@ -32,7 +33,8 @@ class Worker extends SwingWorker<Double, Integer>{
 	CargaListaPdfs pdfs;
 	int visualizacion;
 	
-
+	static final String FUSIONAR = "Fusionar";    /* VESASEV */
+	
 	public Worker(VentanaProgreso vProgreso,CargaListaPdfs pdfs, int visualizacion, JProgressBar progresoNHCs, JProgressBar progresoServicios, JProgressBar progresoNombres, JProgressBar progresoRenombrar, JTextField textoPdfExaminado){
 		this.progresoNHCs = progresoNHCs;
 		this.progresoServicios = progresoServicios;
@@ -109,7 +111,10 @@ class Worker extends SwingWorker<Double, Integer>{
 
 			// publish( Porcentaje NHC, PorcentajeDocumentos, PorcentajeServicios, PorcentajeRenombrar, nº de pdf)
 			// System.out.println("*************************************************************");
-			System.out.println("Pdf número nhc..." + i );
+			// System.out.println("Pdf número nhc..." + i );
+			
+			// JOptionPane.showMessageDialog(null, "NHC ... " + Inicio.listaDocumentos[i].nhc);
+			
 			publish( 0,i*100/numeroDocs,0,0,i);
 		}
 		
@@ -162,6 +167,7 @@ class Worker extends SwingWorker<Double, Integer>{
 		
 		// Tercera tanda de reconocimiento solo para urgencias
 		for(int i=0;i<numeroDocs;i++){
+//	JOptionPane.showMessageDialog(null, "Nhc... " + Inicio.listaDocumentos[i].nhc);
 				Inicio.listaDocumentos[i].reDetectorNHCUrgencias();
 		}
 		
@@ -212,8 +218,10 @@ class Worker extends SwingWorker<Double, Integer>{
 			Inicio.listaDocumentos[i].detectaEKGs();
 			Inicio.listaDocumentos[i].detectaMonitor();
 			Inicio.listaDocumentos[i].detectaDocRosa();
-			if(Inicio.listaDocumentos[i].nhc.equals("Separador"))
-				Inicio.listaDocumentos[i].nombreNormalizado = "X";
+			if(Inicio.listaDocumentos[i].nhc.equals(Inicio.SEPARADOR) || 
+			   Inicio.listaDocumentos[i].nhc.equals(Inicio.SEPARADOR_FUSIONAR))
+					
+					Inicio.listaDocumentos[i].nombreNormalizado = "X";
 			
 			System.out.println("Publico... " + i);
 			
@@ -309,7 +317,7 @@ class Worker extends SwingWorker<Double, Integer>{
 			numSeparador++;
 		}
 		
-
+		
 		
 		int errores = 0;
 		for(int i=0;i<Inicio.listaDocumentos.length;i++){
@@ -341,15 +349,54 @@ class Worker extends SwingWorker<Double, Integer>{
 			//System.out.println(aux);
 			Inicio.carpetasAbiertas.add(auxS);
 		}
-		        					
+		        			
+
+/*   Prueba fusionado */
+		
+		Fusion fusion = new Fusion(Inicio.listaDocumentos);
+		
+		Inicio.listaDocumentos = fusion.getListadoFinal();		
+		
+//		JOptionPane.showMessageDialog(null, "Ver listado anterior... ");
+		
+		Inicio.tamañoCarpetaPdf = Inicio.listaDocumentos.length;
+		
+		tamaño = Inicio.tamañoCarpetaPdf;
+		
+		pdfs.nombrePdfs = new String[tamaño];
+		pdfs.rutaPdfs = new String[tamaño];
+		
 		for(int i=0;i<tamaño;i++){
-			Inicio.modelo.addElement(pdfs.nombrePdfs[i]);
-	//		objetoPuente[i] = pdfs.nombrePdfs[i];
-	//		rutaCompletaPdfs[i] = pdfs.rutaPdfs[i];
-			Inicio.rutaCompletaPdfs[i] = pdfs.rutaPdfs[i];
+			
+			File fichero = new File(Inicio.listaDocumentos[i].rutaArchivo);
+			String nombreAux = fichero.getName();
+	//		Inicio.modelo.addElement(pdfs.nombrePdfs[i]);
+			pdfs.nombrePdfs[i] = nombreAux;
+			
+			Inicio.modelo.addElement(nombreAux);
+
+	//		Inicio.rutaCompletaPdfs[i] = pdfs.rutaPdfs[i];
+			pdfs.rutaPdfs[i] = Inicio.listaDocumentos[i].rutaArchivo;
+			Inicio.rutaCompletaPdfs[i] = Inicio.listaDocumentos[i].rutaArchivo;
+			
+	/*		System.out.println("**************************************************");
+			System.out.println("Pdfs.nombrePdfs[i]: " + pdfs.nombrePdfs[i]);
+			System.out.println("Inicio.rutaCompletaPdfs[i]: " + Inicio.rutaCompletaPdfs[i]);
+			System.out.println("**************************************************");
+			System.out.println(" ");
+	*/
 		}
 		
-		Inicio.tamañoCarpetaPdf = tamaño;
+		
+		for(int i=0;i<tamaño;i++){
+			System.out.println("listadocumentos: " + Inicio.listaDocumentos[i].rutaArchivo );
+			System.out.println("nhc: " + Inicio.listaDocumentos[i].nhc);
+			System.out.println("**************************************************");
+			System.out.println(" ");
+		}
+
+		
+
 		
 		//	Determina el directorio firmados
 		
@@ -577,7 +624,7 @@ class Worker extends SwingWorker<Double, Integer>{
 	
 	String esNumerico(String s){
 		
-		if(!s.equals(Inicio.SEPARADOR)){
+		if(!s.equals(Inicio.SEPARADOR) && !s.equals(Inicio.SEPARADOR_FUSIONAR)){
 			
 			try {
 				int in = Integer.parseInt(s);
@@ -594,7 +641,7 @@ class Worker extends SwingWorker<Double, Integer>{
 			}
 		}
 		
-		return Inicio.SEPARADOR;
+		return s;
 
 	}
 	
@@ -626,11 +673,13 @@ class Worker extends SwingWorker<Double, Integer>{
 				Inicio.jBNHC
 						.setText(Inicio.listaDocumentos[Inicio.numeroPdf].nhc);
 				if (Inicio.listaDocumentos[Inicio.numeroPdf].nhc
-						.equals("Separador")
+						.equals(Inicio.SEPARADOR)
 						|| Inicio.listaDocumentos[Inicio.numeroPdf].nhc
 								.contains("ERROR")
 						|| Inicio.listaDocumentos[Inicio.numeroPdf].nhc
-								.equals("NO")) {
+								.equals("NO")
+						|| Inicio.listaDocumentos[Inicio.numeroPdf].nhc
+								.equals(Inicio.SEPARADOR_FUSIONAR)) {
 					Inicio.jBNHC.setBackground(Color.red);
 					Inicio.jBNHCp.setBackground(Color.red);
 					/*
@@ -664,7 +713,7 @@ class Worker extends SwingWorker<Double, Integer>{
 				}
 
 				if (Inicio.listaDocumentos[Inicio.numeroPdf].nhc
-						.equals("Separador")
+						.equals(Inicio.SEPARADOR)
 						&& !Inicio.listaDocumentos[Inicio.numeroPdf].servicio
 								.equals("X")) {
 					Inicio.jBNHC.setBackground(Color.green);

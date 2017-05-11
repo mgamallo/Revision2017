@@ -38,6 +38,7 @@ public class Inicio extends JFrame {
 	static final String RUTASAL_URG = ":/01 Escaneado Urgencias";
 	static String RUTASAL =":/01 Escaneado Documentacion";
 
+	static String RUTAEXP = ":/digitalización/03 EXPERIMENTAL/01 Escaneado";
 
 //	static final String RUTAURGB ="H:/DIGITALIZACIÓN/01 INFORMES URG (Colectiva)";
 	static String RUTA_NO_RECONOCIDOS = ":/digitalización/00 documentacion/10 Registrar docs";
@@ -64,6 +65,9 @@ public class Inicio extends JFrame {
 	static boolean menuVertical = false;
 	
 	static final String SEPARADOR = "Separador";
+	
+	static final String SEPARADOR_FUSIONAR = "Fusionar";
+	
 	static final String CONSENTIMIENTO = "Consentimento informado";
 	static final String INCLUSION = "Folla inclusión LE";
 	static final String EKG = "ECG";
@@ -236,7 +240,6 @@ public class Inicio extends JFrame {
 		
 		if(nombrePc.toLowerCase().contains("mahc13p") 
 				|| nombrePc.toLowerCase().contains("mahc35p")
-				|| nombrePc.toLowerCase().contains("mahc33p")
 				|| nombrePc.toLowerCase().contains("mahc03p") 
 				|| nombrePc.toLowerCase().contains("mahc01p") 
 				|| nombrePc.toLowerCase().contains("mahc04p") 
@@ -250,17 +253,18 @@ public class Inicio extends JFrame {
 			rutaFocoAcrobat = rutaFocoAcrobat2015v7;
 			
 			System.out.println("Escogemos... " + rutaFocoAcrobatV);
+			
 		}
 		else if(  	
-				
-					nombrePc.toLowerCase().contains("mahc21p") 
+						nombrePc.toLowerCase().contains("mahc21p")
+					||  nombrePc.toLowerCase().contains("mahc33p")
 				){
 			
 			rutaFocoAcrobat = rutaFocoAcrobat2015v7;
 			
 		}
 
-		
+//		JOptionPane.showMessageDialog(null, rutaFocoAcrobat);
 		
 		unidadHDD = detectaUnidadHDD();
 		RUTA = unidadHDD + RUTA;
@@ -272,6 +276,8 @@ public class Inicio extends JFrame {
 		rutaHermes_TXT = unidadHDD + rutaHermes_TXT;
 		rutaHermes_XLS = unidadHDD + rutaHermes_XLS;
 				
+		RUTAEXP = unidadHDD + RUTAEXP;
+		
 		excel = new LeerExcel();
 
 		
@@ -328,6 +334,7 @@ public class Inicio extends JFrame {
 	    	}
 	    }
 	    */
+    
 	    
 	    /*
 	    System.out.println("Numero de elementos del conjunto: " + conjuntoClavesNhc.size());

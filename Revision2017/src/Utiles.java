@@ -7,11 +7,15 @@ import java.awt.event.KeyEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import com.itextpdf.text.Document;
@@ -82,6 +86,7 @@ public class Utiles {
 						
 						else if(Inicio.jBServicio.getText().equals(Inicio.ORLC)){
 							if(Inicio.listaDocumentos[j].nombreNormalizado.equals(Inicio.EKG)){
+					//			JOptionPane.showMessageDialog(null, "Renombrado de ekg a video...");
 								Inicio.listaDocumentos[j].nombreNormalizado = Inicio.VIDEONISTAGMOGRAFÍA;
 							}
 							Inicio.listaDocumentos[j].servicio = Inicio.jBServicio.getText();
@@ -97,6 +102,22 @@ public class Utiles {
 						else if(Inicio.jBServicio.getText().equals(Inicio.CARC) || Inicio.jBServicio.getText().equals(Inicio.PEDC)){
 							if(Inicio.listaDocumentos[j].nombreNormalizado.equals(Inicio.ECO)){
 								Inicio.listaDocumentos[j].nombreNormalizado = Inicio.ECOCARDIOGRAFIA;
+							}
+							Inicio.listaDocumentos[j].servicio = Inicio.jBServicio.getText();
+						}
+						else if(Inicio.jBServicio.getText().equals(Inicio.USMI)){
+							if(Inicio.listaDocumentos[j].nombreNormalizado.equals("X")){
+								switch (Utiles.esUsmi(Inicio.listaDocumentos[j].cadenaOCR, Inicio.paresUsmi)) {
+								case 2:
+									Inicio.listaDocumentos[j].nombreNormalizado = Inicio.INFORME_PSICOPEDAGOXICO;
+									break;
+								case 1:
+									Inicio.listaDocumentos[j].nombreNormalizado = Inicio.INFORME_PSICOPEDAGOXICO;
+									Inicio.listaDocumentos[j].semaforoAmarilloNombre = true;
+									break;
+								default:
+									break;
+								}
 							}
 							Inicio.listaDocumentos[j].servicio = Inicio.jBServicio.getText();
 						}
@@ -203,6 +224,9 @@ public class Utiles {
 		// TODO Auto-generated method stub
 		
 		boolean ajustarCIdeRADM = false;
+		boolean errorAlRenombrar = false;
+		
+		ArrayList<String> listaArchivos = new ArrayList<String>();
 		
 		
 		if(Inicio.ventanaComprobacion != null){
@@ -230,181 +254,190 @@ public class Utiles {
 	    	new CerrarTodo().closePdf();
 	    	System.out.println("Cerrados los pdfs");
  
-	    	ajustarCIdeRADM = esCIdeRx();
+	    	//ajustarCIdeRADM = esCIdeRx();
+	    	ajustarCIdeRADM = true;
 	    	
-	    	for(int i=0;i<Inicio.listaDocumentos.length;i++){
-	    		
-	    			File nombreAntiguo = new File(Inicio.listaDocumentos[i].rutaArchivo);
-	    			
-	    			
-	    			if(Inicio.listaDocumentos[i].nhc.equals("Eliminar")){
-	    				if(nombreAntiguo.delete()){
-	    					System.out.println("Fichero eliminado");
-	    				}else{
-	    					System.out.println("Fichero imposible de eliminar");
-	    				}
-	    			}
-	    			else if(Inicio.listaDocumentos[i].nhc.equals("Apartar")){
-	    				
-	    				int aux = Inicio.listaDocumentos[i].rutaArchivo.lastIndexOf("\\");
-	    				String nombrepdf = Inicio.listaDocumentos[i].rutaArchivo.substring(aux);
-	    				
-	    				String rutaNueva = Inicio.listaDocumentos[i].apartaFichero() + "Apartado por " + Inicio.usuario + ".";
-	    				
-	    				File carpetaNueva = new File(rutaNueva);
-	    				carpetaNueva.mkdirs();
-	    				
-	    				rutaNueva = rutaNueva + nombrepdf;
-	    				System.out.println("Ruta apartado... " + rutaNueva);
-	    				
-	    				
-	    				File nombreNuevo = new File(rutaNueva);
-		    			boolean correcto = nombreAntiguo.renameTo(nombreNuevo);
-		    			if(correcto){
-		    				System.out.println("Renombrado con exito");
-		    			}
-		    			else{
-		    				System.out.println("Error al renombrar");
-		    			}
-		    			
-	    			}
-	    			else{
-	    					    		
-		 				//	Si el nombre fue modificado se guarda una copia
-	    				if(Inicio.listaDocumentos[i].modificado && Inicio.listaDocumentos[i].fisica.tamañoPagina != 1 ){
-	    					
-	    					File carpeta = new File(Inicio.listaDocumentos[i].rutaArchivo);
-	    					carpeta = carpeta.getParentFile();
-	    					
-	    					String nombreCarpeta = carpeta.getName();
-	    					
-	    					if(!nombreCarpeta.toLowerCase().contains("scanner") 
-	    							|| !nombreCarpeta.toLowerCase().contains("scaner")
-	    							|| !nombreCarpeta.toLowerCase().contains("a3") ){
-		    					System.out.println();
-		    					String rutaMalReconocidos = Inicio.RUTA_NO_RECONOCIDOS + "/Equivocados/" + nombreCarpeta ;
-		    					File direct = new File(rutaMalReconocidos);
-		    					direct.mkdirs();
-		    					rutaMalReconocidos += ("/" + nombreAntiguo.getName());
-		    					
-		    					System.out.println("Doc. No reconocido...");
-		    					System.out.println("RutaOriginal... " + "\t" + Inicio.listaDocumentos[i].rutaArchivo);
-		    					System.out.println("RutaNoRecono... " + "\t" + rutaMalReconocidos);
-		    					
-		    					CopiarFichero.copiar(Inicio.listaDocumentos[i].rutaArchivo, rutaMalReconocidos);
-	    					}
-	    					
-
-	    				}
-	    				
-	    				if(ajustarCIdeRADM){
-	    					
-	    					if(Inicio.listaDocumentos[i].servicio.equals("RADM") 
-	    							&& Inicio.listaDocumentos[i].nombreNormalizado.equals(Inicio.CONSENTIMIENTO)){
-	    						
-	    						boolean ajustar = false;
-	    						
-	    						String numeroModelo =  Inicio.listaDocumentos[i].numeroModelo;
-	    						
-	    						if(numeroModelo != null && numeroModelo.length() > 0){
-		    						
-	    							char caracter = numeroModelo.charAt(numeroModelo.length()-1);
-		    						
-		    						System.out.println(caracter);
-		    						
-		    						switch (caracter) {
-									case 'a':
-									case 'b':
-									case 'c':	ajustar = true;	break;
+	    	try {
+				for(int i=0;i<Inicio.listaDocumentos.length;i++){
+					
+						File nombreAntiguo = new File(Inicio.listaDocumentos[i].rutaArchivo);
+						
+						if(nombreAntiguo.exists()){
+							if(Inicio.listaDocumentos[i].nhc.equals("Eliminar")){
+								if(nombreAntiguo.delete()){
+									System.out.println("Fichero eliminado");
+								}else{
+									System.out.println("Fichero imposible de eliminar");
+								}
+							}
+							else if(Inicio.listaDocumentos[i].nhc.equals("Apartar")){
+								
+								int aux = Inicio.listaDocumentos[i].rutaArchivo.lastIndexOf("\\");
+								String nombrepdf = Inicio.listaDocumentos[i].rutaArchivo.substring(aux);
+								
+								String rutaNueva = Inicio.listaDocumentos[i].apartaFichero() + "Apartado por " + Inicio.usuario + ".";
+								
+								File carpetaNueva = new File(rutaNueva);
+								carpetaNueva.mkdirs();
+								
+								rutaNueva = rutaNueva + nombrepdf;
+								System.out.println("Ruta apartado... " + rutaNueva);
+								
+								File nombreNuevo = new File(rutaNueva);
+								boolean correcto = nombreAntiguo.renameTo(nombreNuevo);
+								if(correcto){
+									System.out.println("Renombrado con exito");
+								}
+								else{
+									System.out.println("Error al renombrar");
+									errorAlRenombrar = true;
+								}
+								
+							}
+							else if(Inicio.listaDocumentos[i].nhc.equals("Escanear")){
+								
+								int aux = Inicio.listaDocumentos[i].rutaArchivo.lastIndexOf("\\");
+								String nombrepdf = Inicio.listaDocumentos[i].rutaArchivo.substring(aux);
+								
+								String rutaNueva = Inicio.listaDocumentos[i].apartaFichero() + "Reescanear. " + Inicio.usuario + ".";
+								
+								File carpetaNueva = new File(rutaNueva);
+								carpetaNueva.mkdirs();
+								
+								rutaNueva = rutaNueva + nombrepdf;
+								System.out.println("Ruta reescanear... " + rutaNueva);
+								
+								File nombreNuevo = new File(rutaNueva);
+								
+								
+								boolean correcto = nombreAntiguo.renameTo(nombreNuevo);
+								if(correcto){
+									System.out.println("Renombrado con exito");
+								}
+								else{
+									System.out.println("Error al renombrar");
+									errorAlRenombrar = true;
+								}
+								
+							}						
+							else{
+									    		
+								//	Si el nombre fue modificado se guarda una copia
+								if(Inicio.listaDocumentos[i].modificado && Inicio.listaDocumentos[i].fisica.tamañoPagina != 1 ){
+									
+									File carpeta = new File(Inicio.listaDocumentos[i].rutaArchivo);
+									carpeta = carpeta.getParentFile();
+									
+									String nombreCarpeta = carpeta.getName();
+									
+									if(!nombreCarpeta.toLowerCase().contains("scanner") 
+											|| !nombreCarpeta.toLowerCase().contains("scaner")
+											|| !nombreCarpeta.toLowerCase().contains("a3") ){
+										
+										System.out.println();
+										String rutaMalReconocidos = Inicio.RUTA_NO_RECONOCIDOS + "/Equivocados/" + nombreCarpeta ;
+										File direct = new File(rutaMalReconocidos);
+										direct.mkdirs();
+										rutaMalReconocidos += ("/" + nombreAntiguo.getName());
+										
+										System.out.println("Doc. No reconocido...");
+										System.out.println("RutaOriginal... " + "\t" + Inicio.listaDocumentos[i].rutaArchivo);
+										System.out.println("RutaNoRecono... " + "\t" + rutaMalReconocidos);
+										
+										CopiarFichero.copiar(Inicio.listaDocumentos[i].rutaArchivo, rutaMalReconocidos);
 									}
-		    						
-		    						if(ajustar){
-		    							borrarPaginaInicial(Inicio.listaDocumentos[i].rutaArchivo, Inicio.listaDocumentos[i].rutaArchivo + "f");
-		    						}
-	    						}
+									
 
-	    							
-	    					}
-	    				}
-	    				
-	    				
-	    				String rutaNueva = Inicio.listaDocumentos[i].registraFichero();
-	    				System.out.println("Nombre Nuevo final con fecha: ");
-	    				System.out.println(rutaNueva);
-		    			File nombreNuevo = new File(rutaNueva);
-		    			boolean correcto = nombreAntiguo.renameTo(nombreNuevo);
-		    			if(correcto){
-		    				System.out.println("Renombrado con exito");
-		    			}
-		    			else{
-		    				System.out.println("Error al renombrar");
-		    			}
-		    			
-		    			
+								}
+								
+								if(ajustarCIdeRADM){
+									
+									if(Inicio.listaDocumentos[i].servicio.equals("RADM") 
+											&& Inicio.listaDocumentos[i].nombreNormalizado.equals(Inicio.CONSENTIMIENTO)){
+										
+										boolean ajustar = false;
+										
+										String numeroModelo =  Inicio.listaDocumentos[i].numeroModelo;
+										
+										if(numeroModelo != null && numeroModelo.length() > 0){
+											
+											char caracter = numeroModelo.charAt(numeroModelo.length()-1);
+											
+											System.out.println(caracter);
+											
+											switch (caracter) {
+											case 'a':
+											case 'b':
+											case 'c':	ajustar = true;	break;
+											}
+											
+											if(ajustar){
+												borrarPaginaInicial(Inicio.listaDocumentos[i].rutaArchivo, Inicio.listaDocumentos[i].rutaArchivo + "f");
+											}
+										}
 
-		    			
-	    			}
-	    			
-	    			
-	    			
-	    			
-	    		//}
-	    		/*
-	    		String rutaNueva = Inicio.listaDocumentos[i].registraFichero();
-	    		
-	    			try {
-	    				
-	    				//	Formatea las paginas en ancho
-	    				
-	    				if(Inicio.listaDocumentos[i].fisica.tamañoPagina != 1){
-	    					PdfReader pdf = new PdfReader(Inicio.listaDocumentos[i].rutaArchivo);
-							
-	    					PdfStamper stp = new PdfStamper(pdf, new FileOutputStream(rutaNueva));
-							PdfWriter writer = stp.getWriter();
-							PdfAction pdfAcc;
+											
+									}
+								}
+								
+								
+								String rutaNueva = Inicio.listaDocumentos[i].registraFichero();
+								System.out.println("Nombre Nuevo final con fecha: ");
+								System.out.println(rutaNueva);
+								File nombreNuevo = new File(rutaNueva);
+								
+								listaArchivos.add(nombreNuevo.getName());
+								
+								boolean correcto = nombreAntiguo.renameTo(nombreNuevo);
+								if(correcto){
+									System.out.println("Renombrado con exito");
+								}
+								else{
+									System.out.println("Error al renombrar");
+									errorAlRenombrar = true;
+								}
+								
+								
 
-							pdfAcc = PdfAction.gotoLocalPage(1,new PdfDestination(PdfDestination.FITH), writer);
-							
-							writer.setOpenAction(pdfAcc);
-							stp.close();
-							pdf.close();
-							
-	    				}
- 					
-					}  catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (DocumentException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+								
+							}
+						}
+
 					}
-	    			*/
-	    		}
-	       	
-	    	
-	    	Inicio.listaCarpetasRegistradas.add(Inicio.rutaCarpetaEscaneadaUsuario);
-	    		    	
-	    	Inicio.modelo.removeAllElements();
-	    	Inicio.jBNHC.setText("");
-	    	Inicio.jBNHCp.setText("");
-	    	/*
-			if(Inicio.menuVertical){
-				Inicio.ventanaMicro.jBNHCm.setText("");
-				Inicio.ventanaMicro.jBServiciom.setText("");
-				Inicio.ventanaMicro.jBNombreDocm.setText("");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				StringWriter sw = new StringWriter();
+				e.printStackTrace(new PrintWriter(sw));
+				String textoError = sw.toString();
+				Txt.escribirError(textoError);
+			}finally{
+				Txt.escribirListaFicheros(listaArchivos);
 			}
-			*/
-	    	Inicio.jBServicio.setText("");
-	    	Inicio.jBServiciop.setText("");
-	    	Inicio.jBNombreDoc.setText("");
-	    	Inicio.jBNombreDocp.setText("");
-	    	Inicio.jBNombreDocp.setToolTipText(Inicio.jBNombreDocp.getText());
-	    	Inicio.utiles.encajarNombreNormalizado(Inicio.jBNombreDoc.getText());
-    			
-    		}
+	    	
+	    	
+	    	if(!errorAlRenombrar){
+		    	Inicio.listaCarpetasRegistradas.add(Inicio.rutaCarpetaEscaneadaUsuario);
+		    	
+		    	Inicio.modelo.removeAllElements();
+		    	Inicio.jBNHC.setText("");
+		    	Inicio.jBNHCp.setText("");
+		    	/*
+				if(Inicio.menuVertical){
+					Inicio.ventanaMicro.jBNHCm.setText("");
+					Inicio.ventanaMicro.jBServiciom.setText("");
+					Inicio.ventanaMicro.jBNombreDocm.setText("");
+				}
+				*/
+		    	Inicio.jBServicio.setText("");
+		    	Inicio.jBServiciop.setText("");
+		    	Inicio.jBNombreDoc.setText("");
+		    	Inicio.jBNombreDocp.setText("");
+		    	Inicio.jBNombreDocp.setToolTipText(Inicio.jBNombreDocp.getText());
+		    	Inicio.utiles.encajarNombreNormalizado(Inicio.jBNombreDoc.getText());
+	    			
+	    		}
+	    	}
+
 
     	//	    	Eliminar la carpeta de asociados
 		/*
@@ -443,6 +476,7 @@ public class Utiles {
 
 	}
 
+	
 	public void revisarPropiedadesDocumento(){
 	    	if(!Inicio.listaDocumentos[Inicio.numeroPdf].nhc.equals(Inicio.jBNHCp.getText())){
 	    		System.out.println("Cambiamos el nhc");
@@ -473,7 +507,7 @@ public class Utiles {
 			servicios.add(documento.servicio);
 		}
 		
-		System.out.println("Tamaño del conjunto: " + servicios.size());
+		System.out.println("esCIdeRx. Tamaño del conjunto: " + servicios.size());
 		for(String servicio : servicios){
 			System.out.println(servicio);
 		}
@@ -550,6 +584,7 @@ public class Utiles {
 
 	}
 	
+	
 	public void jBApartarActionPerformed(ActionEvent evt) {
 		// TODO Auto-generated method stub
 		
@@ -581,6 +616,55 @@ public class Utiles {
 		Inicio.jBNombreDoc.setBackground(Color.gray);
 		Inicio.jBNombreDocp.setBackground(Color.gray);
 	}
+	
+	
+	public void jBReEscanearActionPerformed(ActionEvent evt){
+		
+		Inicio.jBNHC.setText("Escanear");
+		Inicio.jBNHCp.setText("Escanear");
+		Inicio.jBServicio.setText("Escanear");
+		Inicio.jBServiciop.setText("Escanear");
+		Inicio.jBNombreDoc.setText("Escanear");
+		Inicio.jBNombreDocp.setText("Escanear");
+		Inicio.utiles.encajarNombreNormalizado(Inicio.jBNombreDoc.getText());
+		Inicio.jBNombreDocp.setToolTipText(Inicio.jBNombreDocp.getText());
+		
+		Inicio.jBNHC.setBackground(Color.gray);
+		Inicio.jBNHCp.setBackground(Color.gray);
+		Inicio.jBServicio.setBackground(Color.gray);
+		Inicio.jBServiciop.setBackground(Color.gray);
+		Inicio.jBNombreDoc.setBackground(Color.gray);
+		Inicio.jBNombreDocp.setBackground(Color.gray);
+		
+		
+		/*
+		if(Inicio.)
+		Object comentario = JOptionPane.showInputDialog(null,"Escribe un breve comentario porqué hay que volver a escanear el documento","Anotación",JOptionPane.QUESTION_MESSAGE);
+		if(comentario.toString() != null){
+				String ruta = Inicio.rutaFirmados + "\\Apartado por " + Inicio.usuario.alias + ". Pendiente";
+				
+				if(Inicio.usuario.tipoDocumentacion == 0){
+					ruta = Inicio.rutaFirmadosUrgencias+ "\\01 " + Inicio.usuario.alias  + "\\03 Firmado\\Apartado por " + Inicio.usuario.alias + ". Pendiente";
+				}
+				else if(Inicio.usuario.tipoDocumentacion == 2){
+					ruta = Inicio.rutaFirmadosSalnes + "\\Apartado por " + Inicio.usuario.alias + ". Pendiente";						}
+				
+				ruta += "\\" + comentario.toString() + "\\";
+				File directorio = new File(ruta);
+				boolean directorioCreado = directorio.mkdirs();
+				if(directorioCreado || directorio.exists()){
+					ruta += Inicio.documento[indexApartado].nombreArchivo;
+					CopiarFichero.copiar(Inicio.documento[indexApartado].rutaArchivo,ruta);
+					JOptionPane.showMessageDialog(null, "Pdf apartado");
+				}
+				else{
+					JOptionPane.showMessageDialog(null, "Error al apartar el documento");;
+				}
+
+		}
+		*/
+	}
+	
 
 	public void jBCarpetaActionPerformed(ActionEvent evt) {
 			// TODO Auto-generated method stub
@@ -745,6 +829,7 @@ public class Utiles {
 
 	}
 	
+	
 	private boolean necesitaFecha(){
 		
 		String nombreDoc = Inicio.listaDocumentos[Inicio.numeroPdf].nombreNormalizado;
@@ -764,6 +849,7 @@ public class Utiles {
 		
 		return false;
 	}
+	
 	
 	public void jBGrabarPagina() {
 		
@@ -1015,5 +1101,111 @@ public class Utiles {
 				}
 			}
 		}
+	}
+	
+	
+	
+	
+	/**
+	 * @param textoOcr
+	 * @return 0 No es. 1 Probable. 2 Casi seguro 
+	 */
+	public static int esUsmi(String textoOcr, String pares[][]){
+		
+		int suma = 0;
+		
+		for(int i=0;i<pares.length;i++){
+			System.out.println(i	+ "\t" + pares[i][0]);
+			if(textoOcr.contains(pares[i][0])){
+				int parcial = Integer.valueOf(pares[i][1]);
+				suma += parcial;
+			}
+		}
+		
+		// JOptionPane.showMessageDialog(null, suma);
+		System.out.println(suma);
+		
+		if(suma >= 5){
+			return 2;
+		}
+		else if (suma >= 4) {
+			return 1;
+		}
+		else{
+			return 0;
+		}
+		
+		
+	}
+	
+	public static void recuperaRutaArchivos(){
+		
+		File rutaCarpeta;
+		
+		String ruta = "";
+		switch (Inicio.destinoDocumentacion) {
+		case 1:
+			ruta = Inicio.RUTA;
+			break;
+		case 2:
+			ruta = Inicio.RUTAURG;
+			break;
+		case 3:
+			ruta = Inicio.RUTASAL;
+			break;
+		}
+		
+		System.out.println(ruta);
+		
+		rutaCarpeta = new File(ruta).getParentFile();
+		String rutaRevision = rutaCarpeta.getAbsolutePath()  + "\\02 Revisado";
+		System.out.println(rutaRevision);
+		
+		JFileChooser selector = new JFileChooser();
+		selector.setDialogTitle("Selecciona la carpeta revisada...");
+		selector.setCurrentDirectory(new File(rutaRevision));
+		selector.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		selector.showOpenDialog(null);
+		File pdfs[];
+		
+		rutaCarpeta= selector.getSelectedFile();
+		
+		if(rutaCarpeta != null){
+			pdfs = rutaCarpeta.listFiles(new FilenameFilter() {
+				
+				@Override
+				public boolean accept(File arg0, String arg1) {
+					// TODO Auto-generated method stub
+					return arg1.toLowerCase().endsWith(".pdf");
+				}
+			});
+
+			for(Documento d : Inicio.listaDocumentos){
+				
+				String nombreArchivoMemoria = new File(d.rutaArchivo).getName();
+				System.out.println("NombreArchivoMemoria:\n" + nombreArchivoMemoria);
+				for(File f : pdfs){
+					String nombreArchivoRevisado = f.getName();
+					if(nombreArchivoMemoria.equals(nombreArchivoRevisado)){
+						d.rutaArchivo = f.getAbsolutePath();
+						System.out.println("NombreArchivoRevisado:\n" + f.getName());
+						break;
+					}
+				}
+				// System.out.println(d.rutaArchivo);
+			}
+			
+			/*
+			for( File f : pdfs){
+				System.out.println(f.getAbsolutePath());
+			}
+			*/
+		}
+
+	}
+	
+	public static void main(String args[]){
+		
+		recuperaRutaArchivos();
 	}
 }

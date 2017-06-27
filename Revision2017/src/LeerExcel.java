@@ -48,7 +48,9 @@ public class LeerExcel {
     
     Object[][] tablaCoordenadas;
     Object[][] tablaVisor;
-    DefaultListModel listaUsuariosLista;
+    String[][] paresUsmi;
+
+	DefaultListModel listaUsuariosLista;
     DefaultListModel listaUsuariosListaUrg;
     DefaultComboBoxModel listaUsuarios;
     DefaultComboBoxModel listaUsuariosUrg;
@@ -384,6 +386,25 @@ public class LeerExcel {
                     }
             }
 	        
+            
+	        //	Obtiene nombres ponderados usmi
+	        hoja = archivoExcel.getSheet(12);
+	        numFilas = 0;
+	        numColumnas = 2;
+	        while(!hoja.getCell(0,numFilas).getContents().toString().equals("#fin")){
+	        	numFilas++;
+	        }
+	        
+	        System.out.println(numFilas);
+	        paresUsmi = new String[numFilas][2];
+	        
+            for (int fila=0;fila<numFilas;fila++){
+                for(int columna=0;columna<numColumnas;columna++){					
+                paresUsmi[fila][columna] = hoja.getCell(columna, fila).getContents().toString();
+                }
+            }
+
+            
             archivoExcel.close();
             
 		} catch (BiffException e) {
@@ -979,4 +1000,8 @@ public class LeerExcel {
         return vinculacionServicio;
     }
     
+    
+    public String[][] getParesUsmi() {
+		return paresUsmi;
+	}
 }

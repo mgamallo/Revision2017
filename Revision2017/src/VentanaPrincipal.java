@@ -62,7 +62,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
-        jButton6 = new JButton();
+        jBsiguiente = new JButton();
         jBFijarServicio = new javax.swing.JButton();
         jBFijarNombres = new javax.swing.JButton();
 
@@ -83,7 +83,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         jButton10 = new javax.swing.JButton();
         jBFirmar = new javax.swing.JButton();
         jBGrabar = new javax.swing.JButton();
-        
+        jBRecuperar = new JButton("Recuperar");
         
         jScrollPaneComunes = new JScrollPane();
         jListComunes = new JList();
@@ -96,9 +96,10 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         setTitle("Panel Principal");
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
  //       setPreferredSize(new java.awt.Dimension(720, 680));
-        setPreferredSize(new java.awt.Dimension(760, 1150));
-        setMinimumSize(new Dimension(760,1150));
-        setResizable(true);
+        setPreferredSize(new java.awt.Dimension(780, 1180));
+ //       setMinimumSize(new Dimension(780,1150));
+        setMinimumSize(new Dimension(780,1180));
+        setResizable(false);
 
         jPanelNorteBotones.setBackground(new java.awt.Color(255, 255, 255));
         jPanelNorteBotones.setPreferredSize(new java.awt.Dimension(750, 110));
@@ -285,12 +286,12 @@ public class VentanaPrincipal extends javax.swing.JFrame {
    		});
         
         // 	Registrar pdf
-        jButton6.setIcon(new javax.swing.ImageIcon("iconos/Giro Derecha 24x24.png")); // NOI18N
-        jButton6.setToolTipText("Documento siguiente");
-        jButton6.setPreferredSize(new Dimension(40,50));
-        jButton6.setMaximumSize(new Dimension(40,50));
-        jButton6.setMinimumSize(new Dimension(40,50));
-        jButton6.addActionListener(new ActionListener() {
+        jBsiguiente.setIcon(new javax.swing.ImageIcon("iconos/Giro Derecha 24x24.png")); // NOI18N
+        jBsiguiente.setToolTipText("Documento siguiente");
+        jBsiguiente.setPreferredSize(new Dimension(50,50));
+        jBsiguiente.setMaximumSize(new Dimension(50,50));
+        jBsiguiente.setMinimumSize(new Dimension(50,50));
+        jBsiguiente.addActionListener(new ActionListener() {
 			
    			@Override
    			public void actionPerformed(ActionEvent e) {
@@ -350,7 +351,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton6, 40 ,40, Short.MAX_VALUE)
+                .addComponent(jBsiguiente, 40 ,40, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jBFijarServicio)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -370,7 +371,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 .addComponent(jButton3)
                 .addComponent(jButton4)
                 .addComponent(jButton5)
-                .addComponent(jButton6,javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addComponent(jBsiguiente,javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addComponent(jBFijarServicio)
                 .addComponent(jBFijarNombres)
                 .addComponent(jButton9)
@@ -744,11 +745,24 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             	Inicio.utiles.registraCambiosFinales();
             }
         });
+        
+        jBRecuperar.setToolTipText("Emergencia. Red caida y recuperada.");
+        jBRecuperar.setBackground(Color.BLACK);
+        jBRecuperar.setForeground(Color.gray);
+        jBRecuperar.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				Utiles.recuperaRutaArchivos();
+			}
+		});
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jBRecuperar, 120, 120, 120)
             .addComponent(jPanelBotonesAuxiliares, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanelNorteBotones, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 711, Short.MAX_VALUE)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -757,10 +771,12 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 .addGap(10, 10, 10)
                 .addComponent(jBGrabar,130,130,130)
                 .addGap(39, 39, 39))
+            
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+            	.addComponent(jBRecuperar, 15, 15, 15)
                 .addComponent(jPanelNorteBotones, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanelBotonesAuxiliares, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE)
@@ -771,8 +787,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                     .addComponent(jBGrabar)
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(74, 74, 74))
+             
         );
-
+        
         pack();
     }// </editor-fold>                        
 
@@ -882,6 +899,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     private javax.swing.JButton jBEliminar;
     private javax.swing.JButton jBFirmar;
     private javax.swing.JButton jBGrabar;
+    private javax.swing.JButton jBRecuperar;
    // private javax.swing.JButton jBNHC;
    // private javax.swing.JButton jBNombreDoc;
    // private javax.swing.JButton jBServicio;
@@ -891,7 +909,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
+    private javax.swing.JButton jBsiguiente;
     private javax.swing.JButton jBFijarServicio;
     private javax.swing.JButton jBFijarNombres;
     private javax.swing.JButton jBCarpeta;

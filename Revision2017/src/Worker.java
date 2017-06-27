@@ -209,24 +209,7 @@ class Worker extends SwingWorker<Double, Integer>{
 		JOptionPane.showMessageDialog(null, "Ver dimensiones");
 		*/
 		
-		for(int i=0;i<numeroDocs;i++){
-			
-			// JOptionPane.showMessageDialog(null, Inicio.listaDocumentos[i].nhc);
-			
-			Inicio.listaDocumentos[i].detectaEcos();
-			Inicio.listaDocumentos[i].detectaEKGsA5();
-			Inicio.listaDocumentos[i].detectaEKGs();
-			Inicio.listaDocumentos[i].detectaMonitor();
-			Inicio.listaDocumentos[i].detectaDocRosa();
-			if(Inicio.listaDocumentos[i].nhc.equals(Inicio.SEPARADOR) || 
-			   Inicio.listaDocumentos[i].nhc.equals(Inicio.SEPARADOR_FUSIONAR))
-					
-					Inicio.listaDocumentos[i].nombreNormalizado = "X";
-			
-			System.out.println("Publico... " + i);
-			
-			publish(100,i*100/numeroDocs,0,0,i);
-		}
+
 		
 		
 		Inicio.separadores = new ArrayList<Integer>();
@@ -272,6 +255,7 @@ class Worker extends SwingWorker<Double, Integer>{
 					System.out.println("Otorrino - videonistag");
 					
 					if(Inicio.listaDocumentos[j].nombreNormalizado.equals(Inicio.EKG)){
+						// JOptionPane.showMessageDialog(null, "Renombrado de ekg a video... " + Inicio.listaDocumentos[j].numeroModelo);
 						Inicio.listaDocumentos[j].nombreNormalizado = Inicio.VIDEONISTAGMOGRAFÍA;
 					}
 					Inicio.listaDocumentos[j].servicio = servicioPosible;
@@ -318,6 +302,139 @@ class Worker extends SwingWorker<Double, Integer>{
 		}
 		
 		
+		for(int i=0;i<numeroDocs;i++){
+			
+			// JOptionPane.showMessageDialog(null, Inicio.listaDocumentos[i].nhc);
+			System.out.println("***********************************************");
+			System.out.println(new File(Inicio.listaDocumentos[i].rutaArchivo).getName());
+			System.out.println("NHC: " +Inicio.listaDocumentos[i].nhc);
+			System.out.println("Vertical: " +Inicio.listaDocumentos[i].fisica.vertical);
+			System.out.println("Tam OCR: " + Inicio.listaDocumentos[i].cadenaOCR.length());
+			System.out.println("Tam Pag: " + Inicio.listaDocumentos[i].fisica.tamañoPagina);
+			System.out.println(Inicio.listaDocumentos[i].cadenaOCR);
+			
+			
+			Inicio.listaDocumentos[i].detectaUsmi();
+			Inicio.listaDocumentos[i].detectaEKGsA5();
+			Inicio.listaDocumentos[i].detectaEKGs();
+			Inicio.listaDocumentos[i].detectaMonitor();
+			Inicio.listaDocumentos[i].detectaDocRosa();
+			Inicio.listaDocumentos[i].detectaEcos();
+			
+			if(Inicio.listaDocumentos[i].nhc.equals(Inicio.SEPARADOR) || 
+			   Inicio.listaDocumentos[i].nhc.equals(Inicio.SEPARADOR_FUSIONAR))
+					
+					Inicio.listaDocumentos[i].nombreNormalizado = "X";
+			
+			System.out.println();
+			//System.out.println("Publico... " + i);
+			
+			
+			
+			publish(100,i*100/numeroDocs,0,0,i);
+		}
+		
+		// Bis. Gran chapuza.
+		//	Adivina nombre separador
+		numSeparador = 1;
+		for(int i=Inicio.separadores.get(0);i<Inicio.listaDocumentos.length;i++){
+			String servicioPosible = AdivinaServicio.getServicio(i + 1,Inicio.separadores.get(numSeparador));
+			
+			System.out.println("Servicio Posible: " + servicioPosible);
+			
+			if(i == -1){
+				i = 0;
+			}
+			for(int j=i;j<Inicio.separadores.get(numSeparador);j++){
+				
+				//Comprobamos si el servicio es anestesia para hacer el cambio anrc - carc
+				if(servicioPosible.equals(Inicio.ANRC) || servicioPosible.equals(Inicio.NRLC)){
+					System.out.println("Anestesia o Neurologia");
+					if(Inicio.listaDocumentos[j].nombreNormalizado.equals(Inicio.EKG)) {
+						Inicio.listaDocumentos[j].servicio = Inicio.CARC;
+					}
+					else{
+						Inicio.listaDocumentos[j].servicio = servicioPosible;
+					}
+					if(j-1 >= i){
+						
+						System.out.println("Neurologia - interconsulta");
+						
+						if(servicioPosible.equals(Inicio.NRLC)){
+							if(Inicio.listaDocumentos[j-1].nombreNormalizado.equals(Inicio.EKG) 
+									&& Inicio.listaDocumentos[j].nombreNormalizado.equals(Inicio.INTERCONSULTA)) {
+								Inicio.listaDocumentos[j].servicio = Inicio.CARC;
+							}
+						}
+					}
+				}
+				else if(servicioPosible.equals(Inicio.ORLC)){
+					
+					System.out.println("Otorrino - videonistag");
+					
+					if(Inicio.listaDocumentos[j].nombreNormalizado.equals(Inicio.EKG)){
+						// JOptionPane.showMessageDialog(null, "Renombrado de ekg a video... " + Inicio.listaDocumentos[j].numeroModelo);
+						Inicio.listaDocumentos[j].nombreNormalizado = Inicio.VIDEONISTAGMOGRAFÍA;
+					}
+					Inicio.listaDocumentos[j].servicio = servicioPosible;
+				}
+				else if(servicioPosible.equals(Inicio.UDOC)){
+					if(Inicio.listaDocumentos[j].nombreNormalizado.equals(Inicio.EKG)){
+						Inicio.listaDocumentos[j].nombreNormalizado = Inicio.MAPA_DERMATOMAS;
+					}
+					Inicio.listaDocumentos[j].servicio = servicioPosible;
+				}
+				else if(servicioPosible.equals(Inicio.CIA)){
+					
+					System.out.println("CIAS toas");
+					
+					Inicio.listaDocumentos[j].servicio = servicioPosible;
+				}
+				
+				else if(servicioPosible.equals(Inicio.HOSP)){
+					System.out.println("Hospitalizac. menos las excepciones");
+					if(!Excepciones.excepcionesIngresos(j)){
+						Inicio.listaDocumentos[j].servicio = servicioPosible;
+					}
+					
+				}
+				else if(servicioPosible.equals(Inicio.CARC) || servicioPosible.equals(Inicio.PEDC)){
+					if(Inicio.listaDocumentos[j].nombreNormalizado.equals(Inicio.ECO)){
+						Inicio.listaDocumentos[j].nombreNormalizado = Inicio.ECOCARDIOGRAFIA;
+					}
+					Inicio.listaDocumentos[j].servicio = servicioPosible;
+				}
+				
+				else if(servicioPosible.equals(Inicio.USMI)){
+					if(Inicio.listaDocumentos[j].nombreNormalizado.equals("X")){
+						switch (Utiles.esUsmi(Inicio.listaDocumentos[j].cadenaOCR, Inicio.paresUsmi)) {
+						case 2:
+							Inicio.listaDocumentos[j].nombreNormalizado = Inicio.INFORME_PSICOPEDAGOXICO;
+							break;
+						case 1:
+							Inicio.listaDocumentos[j].nombreNormalizado = Inicio.INFORME_PSICOPEDAGOXICO;
+							Inicio.listaDocumentos[j].semaforoAmarilloNombre = true;
+							break;
+						default:
+							break;
+						}
+					}
+				}
+				
+				else if(!servicioPosible.equals("")){
+					
+					System.out.println("Toas las demas");
+					Inicio.listaDocumentos[j].servicio = servicioPosible;
+				}
+		
+				
+			}
+			
+			publish(100,100,i*100/Inicio.listaDocumentos.length,0,0);
+			
+			i= Inicio.separadores.get(numSeparador) -1 ;
+			numSeparador++;
+		}
 		
 		int errores = 0;
 		for(int i=0;i<Inicio.listaDocumentos.length;i++){
@@ -455,8 +572,8 @@ class Worker extends SwingWorker<Double, Integer>{
 	    		}
 	    		
 		   //     Inicio.ventanaCompacta = new VentanaCompacta();
-		        Inicio.ventanaPrincipal.setBounds(Inicio.coordenadas.coordenadas[3].x, Inicio.coordenadas.coordenadas[3].y, 750, 970);
-		        Inicio.ventanaPrincipal.setResizable(false);
+		        Inicio.ventanaPrincipal.setBounds(Inicio.coordenadas.coordenadas[3].x-26, Inicio.coordenadas.coordenadas[3].y, 750, 970);
+		   //     Inicio.ventanaPrincipal.setResizable(false);
 		        
 		   /*     Inicio.ventanaCompacta.setBounds(Inicio.coordenadas.coordenadas[2].x, Inicio.coordenadas.coordenadas[2].y, 750, 180);
 		        Inicio.ventanaCompacta.jPanel1.removeKeyListener(Inicio.ventanaCompacta.listener);

@@ -72,9 +72,11 @@ public class VentanaInicio extends javax.swing.JDialog {
         if(Inicio.documentacion == 1 || Inicio.documentacion == 2){
             jlistaUsuarios.setModel(Inicio.excel.listaUsuarios);
             Inicio.RUTASAL = Inicio.detectaUnidadSalnes() + Inicio.RUTASAL_DOC;
+            Inicio.RUTAMENSAJES_DOC = Inicio.detectaUnidadSalnes() + Inicio.RUTAMENSAJES_DOC;
         }else{
         	jlistaUsuarios.setModel(Inicio.excel.listaUsuariosUrg);
         	Inicio.RUTASAL = Inicio.detectaUnidadSalnes() + Inicio.RUTASAL_URG;
+        	Inicio.RUTAMENSAJES_URG = Inicio.detectaUnidadSalnes() + Inicio.RUTAMENSAJES_URG;
         }
 
         jlistaUsuarios.setSelectedIndex(0);

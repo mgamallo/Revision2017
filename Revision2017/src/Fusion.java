@@ -38,9 +38,14 @@ public class Fusion {
 	}
 	
 	
-	boolean fusionar (ArrayList<Documento> lista){
+	static boolean fusionar (ArrayList<Documento> lista){
+		
+		
 		
 		if(lista.size() > 0){
+			
+			new CerrarTodo().closePdf();
+			
 			Document documento = new Document();
 			
 			String pdfFusionadoFinal = lista.get(0).rutaArchivo;
@@ -72,15 +77,24 @@ public class Fusion {
 			
 			documento.close();
 			
-			
+			boolean errorAlBorrar = false;
 			for(int i=0;i<lista.size();i++){
 					File fichero = new File(lista.get(i).rutaArchivo);
-					fichero.delete();
+					if(!fichero.delete()){
+						errorAlBorrar = true;
+					}
+					
+			}
+			
+			if(errorAlBorrar){
+				JOptionPane.showMessageDialog(null, "Error al borrar pdfs ya fusionados");
 			}
 			
 			File fichero = new File(pdfFusion);
 			String aux = pdfFusion.substring(0,pdfFusion.length()-3);
-			fichero.renameTo(new File(aux));
+			if(!fichero.renameTo(new File(aux))){
+				JOptionPane.showMessageDialog(null, "Error al renombrar el pdf fusionado");
+			}
 			
 			
 			return true;

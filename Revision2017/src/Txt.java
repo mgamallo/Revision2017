@@ -17,8 +17,12 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.TreeMap;
+
+import javax.swing.JOptionPane;
 
 
 public class Txt {
@@ -177,6 +181,141 @@ public class Txt {
 	}
 	
 	
+	static public void escribirError(String error){
+		FileWriter fichero = null;
+		PrintWriter pw = null;
+		
+		String carpetaLogs = "c:\\errorRevision\\";
+		File log = new File(carpetaLogs);
+		if(!log.exists()){
+			log.mkdirs();
+		}
+
+		
+		Calendar hoy = Calendar.getInstance();
+		String nombreFichero = String.valueOf(hoy.get(Calendar.YEAR));
+		String mes = "" + (hoy.get(Calendar.MONTH)+1);
+		if(mes.length() < 2){
+			mes = "0" + mes;
+		}
+		nombreFichero += mes;
+		
+		String dia = "" + hoy.get(Calendar.DAY_OF_MONTH);
+		if(dia.length() <2){
+			dia = "0" + dia;
+		}
+		nombreFichero += dia;
+		
+		char caracteres[] = "abcdefghijklmn".toCharArray();
+		int tam = caracteres.length;
+		Random ra = new Random();
+		StringBuffer sb = new StringBuffer();
+		for(int i=0;i<10;i++){
+			sb.append(caracteres[ra.nextInt(tam)]);
+		}
+		
+		nombreFichero += (" " + sb);
+		carpetaLogs += (nombreFichero + ".txt");
+		
+		System.out.println(carpetaLogs);
+		
+		try {
+			fichero = new FileWriter(carpetaLogs);
+			pw = new PrintWriter(fichero);
+				pw.println(error);
+				
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			if(null != fichero){
+				try {
+					fichero.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	
+	static public void escribirListaFicheros(ArrayList<String> lista){
+		FileWriter fichero = null;
+		PrintWriter pw = null;
+		
+		
+		System.out.println(lista);
+		
+		String carpetaLogs = "c:\\logs\\";
+		File log = new File(carpetaLogs);
+		if(!log.exists()){
+			log.mkdirs();
+		}
+
+		String numCarpeta = "";
+		if(lista.size()>0){
+			int aux = lista.get(0).indexOf("$");
+			if(aux != -1){
+				numCarpeta = lista.get(0).substring(aux+1);
+				aux = numCarpeta.indexOf(" ");
+				numCarpeta = numCarpeta.substring(0, aux);
+			}
+		}
+		
+		Calendar hoy = Calendar.getInstance();
+		String nombreFichero = String.valueOf(hoy.get(Calendar.YEAR));
+		String mes = "" + (hoy.get(Calendar.MONTH)+1);
+		if(mes.length() < 2){
+			mes = "0" + mes;
+		}
+		nombreFichero += mes;
+		
+		String dia = "" + hoy.get(Calendar.DAY_OF_MONTH);
+		if(dia.length() <2){
+			dia = "0" + dia;
+		}
+		nombreFichero += dia;
+		
+		nombreFichero += (" " + numCarpeta + " ");
+		
+		char caracteres[] = "abcdefghijklmn".toCharArray();
+		int tam = caracteres.length;
+		Random ra = new Random();
+		StringBuffer sb = new StringBuffer();
+		for(int i=0;i<10;i++){
+			sb.append(caracteres[ra.nextInt(tam)]);
+		}
+		
+		nombreFichero += (" " + sb);
+		carpetaLogs += (nombreFichero + ".txt");
+		
+		System.out.println(carpetaLogs);
+		
+		try {
+			fichero = new FileWriter(carpetaLogs);
+			pw = new PrintWriter(fichero);
+			for(String pdf : lista){
+				pw.println(pdf);
+			}
+			
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			if(null != fichero){
+				try {
+					fichero.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
+	}
 
 	
 	public static void main(String args[]){

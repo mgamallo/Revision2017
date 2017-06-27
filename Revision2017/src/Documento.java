@@ -1098,14 +1098,18 @@ public class Documento {
 	
 	void detectaEKGsA5(){
 		
-		int altoReal = (this.fisica.dimensiones.alto < this.fisica.dimensiones.ancho) ? this.fisica.dimensiones.alto : this.fisica.dimensiones.ancho;
-		int anchoReal = (this.fisica.dimensiones.alto > this.fisica.dimensiones.ancho) ? this.fisica.dimensiones.alto : this.fisica.dimensiones.ancho;
+		if(this.nombreNormalizado.equals("X") && !this.nhc.equals(Inicio.SEPARADOR)
+				&& !this.nhc.equals(Inicio.SEPARADOR_FUSIONAR)){
 		
-		if( (altoReal > Inicio.ECG_A5_ALTO_MIN && altoReal < Inicio.ECG_A5_ALTO_MAX) && (anchoReal > Inicio.ECG_A5_ANCHO_MIN_A && anchoReal < Inicio.ECG_A5_ANCHO_MAX_A)){
-			this.nombreNormalizado = Inicio.EKG;
-		}
-		else if((altoReal > Inicio.ECG_A5_ALTO_MIN && altoReal < Inicio.ECG_A5_ALTO_MAX) && (anchoReal > Inicio.ECG_A5_ANCHO_MIN_B && anchoReal < Inicio.ECG_A5_ANCHO_MAX_B)){
-			this.nombreNormalizado = Inicio.EKG;
+			int altoReal = (this.fisica.dimensiones.alto < this.fisica.dimensiones.ancho) ? this.fisica.dimensiones.alto : this.fisica.dimensiones.ancho;
+			int anchoReal = (this.fisica.dimensiones.alto > this.fisica.dimensiones.ancho) ? this.fisica.dimensiones.alto : this.fisica.dimensiones.ancho;
+			
+			if( (altoReal > Inicio.ECG_A5_ALTO_MIN && altoReal < Inicio.ECG_A5_ALTO_MAX) && (anchoReal > Inicio.ECG_A5_ANCHO_MIN_A && anchoReal < Inicio.ECG_A5_ANCHO_MAX_A)){
+				this.nombreNormalizado = Inicio.EKG;
+			}
+			else if((altoReal > Inicio.ECG_A5_ALTO_MIN && altoReal < Inicio.ECG_A5_ALTO_MAX) && (anchoReal > Inicio.ECG_A5_ANCHO_MIN_B && anchoReal < Inicio.ECG_A5_ANCHO_MAX_B)){
+				this.nombreNormalizado = Inicio.EKG;
+			}
 		}
 	}
 
@@ -1113,9 +1117,10 @@ public class Documento {
 		
 		if(this.nombreNormalizado.equals("X") && !this.nhc.equals(Inicio.SEPARADOR)
 				&& !this.nhc.equals(Inicio.SEPARADOR_FUSIONAR)){
-			if((this.fisica.dimensiones.alto <= 330 && this.fisica.dimensiones.alto >= 290) || 
-					this.fisica.dimensiones.ancho <= 330 && this.fisica.dimensiones.ancho >= 290){
-				if( this.servicio.equals(Inicio.CARC) || this.servicio.equals(Inicio.PEDC)){
+			if((this.fisica.dimensiones.alto <= Inicio.ECO_ALTO_MAX && this.fisica.dimensiones.alto >= Inicio.ECO_ALTO_MIN) || 
+					this.fisica.dimensiones.ancho <= Inicio.ECO_ALTO_MAX && this.fisica.dimensiones.ancho >= Inicio.ECO_ALTO_MIN){
+				if(( this.servicio.equals(Inicio.CARC) || this.servicio.equals(Inicio.PEDC)) 
+						&& (fisica.dimensiones.ancho < Inicio.ECO_ANCHO_MAX && fisica.dimensiones.alto < Inicio.ECO_ANCHO_MAX)){
 					this.nombreNormalizado = Inicio.ECOCARDIOGRAFIA;
 				}
 				else{
@@ -1146,6 +1151,18 @@ public class Documento {
 					this.nombreNormalizado = Inicio.DOC;
 				}
 				
+			}
+		}
+	}
+	
+	void detectaUsmi(){
+		if(this.nombreNormalizado.equals("X") && !this.nhc.equals(Inicio.SEPARADOR)
+				&& !this.nhc.equals(Inicio.SEPARADOR_FUSIONAR)){
+			if(servicio.equals(Inicio.USMI) && this.fisica.tamañoPagina == 0 && this.fisica.vertical == 2){
+				this.nombreNormalizado = Inicio.TEST_PSICOLOXICO;
+				}
+			else if(servicio.equals(Inicio.USMI) && cadenaOCR.length() <150){
+				this.nombreNormalizado = Inicio.TEST_PSICOLOXICO;
 			}
 		}
 	}

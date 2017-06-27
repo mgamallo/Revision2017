@@ -121,7 +121,7 @@ public class CapturaRatonYTeclado implements NativeKeyListener,
 
 				if ((codigo >= 48 && codigo <= 57)
 						|| (codigo >= 96 && codigo <= 105)) {
-					System.out.println("Es un número");
+					System.out.println("Es un numero");
 					if (codigo >= 96) {
 						codigo = codigo - 48;
 					}

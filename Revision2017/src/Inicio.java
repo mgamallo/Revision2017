@@ -36,6 +36,8 @@ public class Inicio extends JFrame {
 //	static String RUTASAL =":/digitalización/02 Salnés/01 Escaneado";
 	static final String RUTASAL_DOC = ":/01 Escaneado Documentacion";
 	static final String RUTASAL_URG = ":/01 Escaneado Urgencias";
+	static String RUTAMENSAJES_DOC = ":/02 Mensajes Doc";
+	static String RUTAMENSAJES_URG = ":/02 Mensajes Urg";
 	static String RUTASAL =":/01 Escaneado Documentacion";
 
 	static String RUTAEXP = ":/digitalización/03 EXPERIMENTAL/01 Escaneado";
@@ -90,6 +92,8 @@ public class Inicio extends JFrame {
 	public static final String ORDENES_MEDICAS = "Ordes médicas";
 	public static final String REGISTRO_ANESTESIA = "Rexistro anestesia";
 	public static final String INFORME_ALTA = "Informe alta";
+	public static final String TEST_PSICOLOXICO = "Test psicolóxico";
+	public static final String INFORME_PSICOPEDAGOXICO = "Informe psicopedagoxía centro externo";
 	
     public static final String CARC = "CARC";
     public static final String PEDC = "PEDC";
@@ -104,15 +108,22 @@ public class Inicio extends JFrame {
 	public static final String ETMC = "ETMC";
 	public static final String DERC = "DERC";
 	public static final String UDOC = "UDOC";
+	public static final String USMI = "USMI";
 	
 	public static final String CONS = "CONS";
 
 	public static final int ECG_A5_ALTO_MIN = 311;
 	public static final int ECG_A5_ALTO_MAX = 324;
-	public static final int ECG_A5_ANCHO_MIN_A = 837;
+	public static final int ECG_A5_ANCHO_MIN_A = 815;
 	public static final int ECG_A5_ANCHO_MIN_B = 420;
-	public static final int ECG_A5_ANCHO_MAX_A = 861;
-	public static final int ECG_A5_ANCHO_MAX_B = 430;
+	public static final int ECG_A5_ANCHO_MAX_A = 875;
+	public static final int ECG_A5_ANCHO_MAX_B = 444;
+	
+	public static final int ECO_ALTO_MIN = 300;
+	public static final int ECO_ALTO_MAX = 314;
+	public static final int ECO_ANCHO_MAX = 800;
+
+	public static String paresUsmi[][];
 
 	//	1 Documentacion; 2 Salnes; 0 Urgencias
 	static int destinoDocumentacion = 1;
@@ -168,6 +179,7 @@ public class Inicio extends JFrame {
     static int numeroPdf;
     static int tamañoCarpetaPdf;
     static String rutaDirectorio;
+    static int numeroCarpeta;
     
     static Documento[] listaDocumentos;
     static ArrayList<Modelo> modelos = new ArrayList<Modelo>();
@@ -243,7 +255,8 @@ public class Inicio extends JFrame {
 				|| nombrePc.toLowerCase().contains("mahc03p") 
 				|| nombrePc.toLowerCase().contains("mahc01p") 
 				|| nombrePc.toLowerCase().contains("mahc04p") 
-				|| nombrePc.toLowerCase().contains("mahc17p") ){
+				|| nombrePc.toLowerCase().contains("mahc17p") 
+				){
 			
 		//	acrobatAntiguo = true;
 		//	rutaFocoAcrobat = "cal\\FocoAcrobat2.exe";
@@ -258,8 +271,9 @@ public class Inicio extends JFrame {
 		else if(  	
 						nombrePc.toLowerCase().contains("mahc21p")
 					||  nombrePc.toLowerCase().contains("mahc33p")
+					
 				){
-			
+
 			rutaFocoAcrobat = rutaFocoAcrobat2015v7;
 			
 		}
@@ -291,6 +305,10 @@ public class Inicio extends JFrame {
 		
 		// Obtiene los nombres de los facultativos. Posiblemente borrar.
 		excel.leerFacultativos("facSalnes.xls", 1);
+		
+		// Obtiene los pares valores de USMI
+	    paresUsmi = excel.getParesUsmi();
+		
 		
 //		CapturaRatonYTeclado capturaBorrar = new CapturaRatonYTeclado();
 		
